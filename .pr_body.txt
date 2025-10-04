@@ -1,0 +1,3 @@
+Add a safe fallback to use Node's crypto.createHash when expo-crypto is not available (non-Expo/test environments). This prevents runtime errors like "Cannot find native module \"ExponentCrypto\"" and keeps existing behavior in Expo apps.
+
+Tests: ran unit tests (6 suites, 98 tests) locally and all passed.

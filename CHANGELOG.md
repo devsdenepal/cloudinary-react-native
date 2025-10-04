@@ -1,3 +1,13 @@
+```markdown
+Unreleased
+==========
+
+* Fix: fallback to Node crypto when `expo-crypto` is unavailable to avoid native module errors in non-Expo environments (tests verified)
+
+1.2.1/ 2025-16-09
+=================
+
+* Fix dependencies
 1.2.1/ 2025-16-09
 =================
 
