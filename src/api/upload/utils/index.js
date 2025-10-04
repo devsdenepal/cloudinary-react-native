@@ -1,6 +1,38 @@
 import { DEFAULT_SIGNATURE_ALGORITHM } from './consts';
 import { isArray } from 'util';
-import * as Crypto from 'expo-crypto';
+
+// Try to use expo-crypto when available (Expo apps). In non-Expo or test
+// environments fall back to Node's crypto module if present. This avoids
+// module load failures like "Cannot find native module 'ExponentCrypto'"
+// when the library is used outside of Expo-managed projects.
+let Crypto;
+try {
+  // Prefer require so bundlers don't eagerly fail when package is absent.
+  // eslint-disable-next-line global-require
+  Crypto = require('expo-crypto');
+} catch (e) {
+  try {
+    // Node environment fallback for tests and non-Expo usage.
+    // eslint-disable-next-line global-require
+    const nodeCrypto = require('crypto');
+    Crypto = {
+      // Provide the same shape expected by the rest of the code.
+      CryptoDigestAlgorithm: {
+        SHA256: 'SHA256',
+        SHA1: 'SHA1',
+      },
+      // expo-crypto exposes digestStringAsync(algorithm, input)
+      digestStringAsync: async (algorithm, input) => {
+        const alg = (algorithm || '').toString().toLowerCase();
+        const nodeAlg = alg.includes('sha1') || alg === 'sha1' ? 'sha1' : 'sha256';
+        return nodeCrypto.createHash(nodeAlg).update(input, 'utf8').digest('hex');
+      },
+    };
+  } catch (nodeErr) {
+    // Re-throw the original error to keep diagnostics if neither is present.
+    throw e;
+  }
+}
 
 const entries = require('./entries');
 const toArray = require('./toArray');
